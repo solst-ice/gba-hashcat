@@ -330,18 +330,6 @@ namespace
         return digest;
     }
 
-    bool digests_equal(const hc::sha256_digest& a, const hc::sha256_digest& b)
-    {
-        for(int i = 0; i < 32; ++i)
-        {
-            if(a.bytes[i] != b.bytes[i])
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
     // A view into one wordlist line, excluding its CR/LF terminator.
     struct candidate
     {
@@ -572,11 +560,11 @@ namespace
                 }
 
                 last_tried = c;
-                hc::sha256_digest digest = hc::sha256(bn::string_view(c.data, c.size));
                 ++processed;
                 ++hashes_in_interval;
 
-                if(digests_equal(digest, target))
+                if(hc::sha256_matches(reinterpret_cast<const uint8_t*>(c.data),
+                                      uint32_t(c.size), target))
                 {
                     found = true;
                 }

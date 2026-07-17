@@ -15,13 +15,22 @@
 namespace hc
 {
     // Raw 32-byte (256-bit) SHA-256 digest.
-    struct sha256_digest
+    struct alignas(4) sha256_digest
     {
         uint8_t bytes[32];
     };
 
     // Computes the SHA-256 digest of the given byte buffer.
     sha256_digest sha256(const uint8_t* data, uint32_t length);
+
+    // Fast cracking path: hashes and compares without materializing a digest.
+    extern "C" bool hc_sha256_matches(const uint8_t* data, uint32_t length,
+                                       const sha256_digest& target);
+
+    inline bool sha256_matches(const uint8_t* data, uint32_t length, const sha256_digest& target)
+    {
+        return hc_sha256_matches(data, length, target);
+    }
 
     // Convenience overload for text input.
     sha256_digest sha256(const bn::string_view& text);
